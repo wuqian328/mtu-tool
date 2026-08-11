@@ -1085,6 +1085,12 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lPara
 
             switch (id) {
                 case IDC_APPLY_BTN: {
+                    // 检查是否选择了网卡
+                    if (GetSelectedAdapterIndex() < 0) {
+                        MessageBoxW(g_hWnd, L"请先在列表中选择一个网卡。",
+                                    L"MTU Tool - 提示", MB_ICONINFORMATION);
+                        break;
+                    }
                     // 读取输入框中的 MTU 值
                     wchar_t buf[16] = {};
                     GetWindowTextW(g_hMtuEdit, buf, _countof(buf));
@@ -1094,18 +1100,38 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lPara
                     break;
                 }
                 case IDC_PRESET_1500:
+                    if (GetSelectedAdapterIndex() < 0) {
+                        MessageBoxW(g_hWnd, L"请先在列表中选择一个网卡。",
+                                    L"MTU Tool - 提示", MB_ICONINFORMATION);
+                        break;
+                    }
                     SetWindowTextW(g_hMtuEdit, L"1500");
                     StartMtuValidation(1500);
                     break;
                 case IDC_PRESET_1492:
+                    if (GetSelectedAdapterIndex() < 0) {
+                        MessageBoxW(g_hWnd, L"请先在列表中选择一个网卡。",
+                                    L"MTU Tool - 提示", MB_ICONINFORMATION);
+                        break;
+                    }
                     SetWindowTextW(g_hMtuEdit, L"1492");
                     StartMtuValidation(1492);
                     break;
                 case IDC_PRESET_1472:
+                    if (GetSelectedAdapterIndex() < 0) {
+                        MessageBoxW(g_hWnd, L"请先在列表中选择一个网卡。",
+                                    L"MTU Tool - 提示", MB_ICONINFORMATION);
+                        break;
+                    }
                     SetWindowTextW(g_hMtuEdit, L"1472");
                     StartMtuValidation(1472);
                     break;
                 case IDC_PRESET_9000:
+                    if (GetSelectedAdapterIndex() < 0) {
+                        MessageBoxW(g_hWnd, L"请先在列表中选择一个网卡。",
+                                    L"MTU Tool - 提示", MB_ICONINFORMATION);
+                        break;
+                    }
                     SetWindowTextW(g_hMtuEdit, L"9000");
                     StartMtuValidation(9000);
                     break;
