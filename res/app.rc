@@ -1,0 +1,44 @@
+#include <winver.h>
+
+// ── 图标资源 ─────────────────────────────────────────
+// 如果 app.ico 不存在，使用默认图标（不会导致编译失败）
+#ifdef IDI_MAIN
+#undef IDI_MAIN
+#endif
+#define IDI_MAIN 101
+IDI_MAIN ICON "app.ico"
+
+// ── Manifest 嵌入（UAC 提权 + 通用控件样式）─────────
+#define CREATEPROCESS_MANIFEST_RESOURCE_ID 1
+#define RT_MANIFEST 24
+CREATEPROCESS_MANIFEST_RESOURCE_ID RT_MANIFEST "app.manifest"
+
+// ── 版本信息 ─────────────────────────────────────────
+VS_VERSION_INFO VERSIONINFO
+FILEVERSION     2,0,0,0
+PRODUCTVERSION  2,0,0,0
+FILEFLAGSMASK   0x3fL
+FILEFLAGS       0x0L
+FILEOS          VOS_NT_WINDOWS32
+FILETYPE        VFT_APP
+FILESUBTYPE     VFT2_UNKNOWN
+BEGIN
+    BLOCK "StringFileInfo"
+    BEGIN
+        BLOCK "080404B0"   // 中文简体, Unicode
+        BEGIN
+            VALUE "CompanyName",      "MTU Tool"
+            VALUE "FileDescription",  "\u672c\u5730\u7f51\u5361 MTU \u503c\u4fee\u6539\u5de5\u5177"
+            VALUE "FileVersion",      "2.0.0.0"
+            VALUE "InternalName",     "mtu-tool"
+            VALUE "LegalCopyright",   "Copyright (C) 2024"
+            VALUE "OriginalFilename", "mtu-tool.exe"
+            VALUE "ProductName",      "MTU Tool"
+            VALUE "ProductVersion",   "2.0.0.0"
+        END
+    END
+    BLOCK "VarFileInfo"
+    BEGIN
+        VALUE "Translation", 0x0804, 0x04B0
+    END
+END
