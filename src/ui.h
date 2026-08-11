@@ -29,6 +29,7 @@
 #define IDC_PING_LABEL    1016    // "Ping目标:" 标签
 #define IDC_MTU_TEST_BTN  1017    // MTU 分片测试按钮
 #define IDC_SPLITTER      1018    // 列表/日志分割条
+#define IDC_CLEAR_LOG     1019    // 清除日志
 
 // ============================================================
 // 自定义窗口消息

@@ -45,10 +45,10 @@ bool EnumerateAdapters(std::vector<AdapterInfo>& outAdapters);
 bool SetMTUviaAPI(NET_IFINDEX ifIndex, uint32_t newMTU);
 
 // 回退方案: 通过 netsh 命令行修改 MTU
-//   参数 adapterName : 网卡名称（用于 netsh 命令）
+//   参数 ifIndex    : 网络接口索引（用于 netsh 命令）
 //   参数 newMTU      : 目标 MTU 值
 //   成功返回 true，失败时可通过 GetLastError 获取 CreateProcess 错误
-bool SetMTUviaNetsh(const std::wstring& adapterName, uint32_t newMTU);
+bool SetMTUviaNetsh(NET_IFINDEX ifIndex, uint32_t newMTU);
 
 // ============================================================
 // 连通性测试

@@ -160,12 +160,12 @@ static int GetSelectedAdapterIndex() {
     return ListView_GetNextItem(g_hListView, -1, LVNI_SELECTED);
 }
 
-// 从 ListView 中获取指定索引的网卡名称（第 0 列）
-static std::wstring GetAdapterNameFromList(int index) {
+// 从 ListView 中获取指定索引的网卡名称（第 1 列）
+    static std::wstring GetAdapterNameFromList(int index) {
     wchar_t buf[256] = {};
     LVITEMW lvi = {};
     lvi.mask       = LVIF_TEXT;
-    lvi.iSubItem   = 0;
+    lvi.iSubItem   = 1;
     lvi.pszText    = buf;
     lvi.cchTextMax = static_cast<int>(_countof(buf));
     // 使用 SendMessage 而非宏，避免参数不匹配
@@ -238,25 +238,30 @@ static void OnCreate(HWND hWnd) {
     LVCOLUMNW col = {};
     col.mask = LVCF_TEXT | LVCF_WIDTH | LVCF_FMT;
 
-    col.pszText = const_cast<LPWSTR>(L"网卡名称");
-    col.cx      = 260;
-    col.fmt     = LVCFMT_LEFT;
+    col.pszText = const_cast<LPWSTR>(L"IDX");
+    col.cx      = 50;
+    col.fmt     = LVCFMT_CENTER;
     ListView_InsertColumn(g_hListView, 0, &col);
+
+    col.pszText = const_cast<LPWSTR>(L"网卡名称");
+    col.cx      = 240;
+    col.fmt     = LVCFMT_LEFT;
+    ListView_InsertColumn(g_hListView, 1, &col);
 
     col.pszText = const_cast<LPWSTR>(L"当前MTU");
     col.cx      = 80;
     col.fmt     = LVCFMT_CENTER;
-    ListView_InsertColumn(g_hListView, 1, &col);
+    ListView_InsertColumn(g_hListView, 2, &col);
 
     col.pszText = const_cast<LPWSTR>(L"MAC地址");
     col.cx      = 150;
     col.fmt     = LVCFMT_CENTER;
-    ListView_InsertColumn(g_hListView, 2, &col);
+    ListView_InsertColumn(g_hListView, 3, &col);
 
     col.pszText = const_cast<LPWSTR>(L"状态");
     col.cx      = 70;
     col.fmt     = LVCFMT_CENTER;
-    ListView_InsertColumn(g_hListView, 3, &col);
+    ListView_InsertColumn(g_hListView, 4, &col);
 
     // ── "修改MTU:" 标签 ──
     CreateWindowExW(0, WC_STATICW, L"修改MTU:",
@@ -298,28 +303,28 @@ static void OnCreate(HWND hWnd) {
                     g_hInst, nullptr);
 
     // ── 预设按钮 ──
-    CreateWindowExW(0, WC_BUTTONW, L"1500 标准以太网",
+    CreateWindowExW(0, WC_BUTTONW, L"标准：1500",
                     WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON,
                     0, 0, 0, 0,
                     hWnd,
                     reinterpret_cast<HMENU>(static_cast<INT_PTR>(IDC_PRESET_1500)),
                     g_hInst, nullptr);
 
-    CreateWindowExW(0, WC_BUTTONW, L"1492 PPPoE",
+    CreateWindowExW(0, WC_BUTTONW, L"PPPoE：1492",
                     WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON,
                     0, 0, 0, 0,
                     hWnd,
                     reinterpret_cast<HMENU>(static_cast<INT_PTR>(IDC_PRESET_1492)),
                     g_hInst, nullptr);
 
-    CreateWindowExW(0, WC_BUTTONW, L"1472 VPN",
+    CreateWindowExW(0, WC_BUTTONW, L"VPN：1472",
                     WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON,
                     0, 0, 0, 0,
                     hWnd,
                     reinterpret_cast<HMENU>(static_cast<INT_PTR>(IDC_PRESET_1472)),
                     g_hInst, nullptr);
 
-    CreateWindowExW(0, WC_BUTTONW, L"9000 巨型帧",
+    CreateWindowExW(0, WC_BUTTONW, L"巨型帧：9000",
                     WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON,
                     0, 0, 0, 0,
                     hWnd,
@@ -346,6 +351,13 @@ static void OnCreate(HWND hWnd) {
                     0, 0, 0, 0,
                     hWnd,
                     reinterpret_cast<HMENU>(static_cast<INT_PTR>(IDC_REFRESH_BTN)),
+                    g_hInst, nullptr);
+
+    CreateWindowExW(0, WC_BUTTONW, L"清除日志",
+                    WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON,
+                    0, 0, 0, 0,
+                    hWnd,
+                    reinterpret_cast<HMENU>(static_cast<INT_PTR>(IDC_CLEAR_LOG)),
                     g_hInst, nullptr);
 
     // ── "Ping目标:" 标签 ──
@@ -433,9 +445,9 @@ static void OnSize(HWND hWnd, int cx, int cy) {
     const int EDIT_W     = 70;
     const int APPLY_W    = 55;
     const int PRESET_LBL_W = 38;
-    const int PRESET_SM  = 75;   // 短预设按钮 (1472 VPN)
+    const int PRESET_SM  = 95;   // 短预设按钮 (1472 VPN)
     const int PRESET_MD  = 95;   // 中预设按钮 (1492 PPPoE, 9000 巨型帧)
-    const int PRESET_LG  = 120;  // 长预设按钮 (1500 标准以太网)
+    const int PRESET_LG  = 95;  // 长预设按钮 (1500 标准以太网)
     const int BTN_GAP    = 5;
     const int TOOL_W     = 85;   // 工具按钮宽度
     const int GROUP_GAP  = 16;   // 组间距
@@ -514,6 +526,8 @@ static void OnSize(HWND hWnd, int cx, int cy) {
     MoveWindow(GetDlgItem(hWnd, IDC_RESTORE_BTN), x, row2Y, TOOL_W, ROW_H, TRUE);
     x += TOOL_W + BTN_GAP;
     MoveWindow(GetDlgItem(hWnd, IDC_REFRESH_BTN), x, row2Y, TOOL_W, ROW_H, TRUE);
+    x += TOOL_W + BTN_GAP;
+    MoveWindow(GetDlgItem(hWnd, IDC_CLEAR_LOG), x, row2Y, TOOL_W, ROW_H, TRUE);
 
     // ── 分割条 ──
     MoveWindow(g_hSplitter, MARGIN, splitterY, cx - MARGIN * 2, SPLITTER_H, TRUE);
@@ -583,32 +597,37 @@ static void OnEnumDone(BOOL success, std::vector<AdapterInfo>* adapters) {
     for (size_t i = 0; i < g_adapters.size(); i++) {
         const auto& ad = g_adapters[i];
 
-        // 插入行
+        // 插入行（第0列 = IDX）
         LVITEMW lvi = {};
         lvi.mask     = LVIF_TEXT;
         lvi.iItem    = static_cast<int>(i);
-        lvi.pszText  = const_cast<LPWSTR>(ad.name.c_str());
+        wchar_t idxStr[16];
+        _snwprintf_s(idxStr, _countof(idxStr), _TRUNCATE, L"%lu", ad.ifIndex);
+        lvi.pszText  = idxStr;
         lvi.cchTextMax = 0;
 
         int idx = ListView_InsertItem(g_hListView, &lvi);
         if (idx == -1) continue;
 
-        // 设置子项
-        // MTU
+        // 网卡名称 (column 1)
+        ListView_SetItemText(g_hListView, idx, 1,
+                             const_cast<LPWSTR>(ad.name.c_str()));
+
+        // MTU (column 2)
         wchar_t mtuStr[16];
         if (ad.mtu > 0) {
             _snwprintf_s(mtuStr, _countof(mtuStr), _TRUNCATE, L"%lu", ad.mtu);
         } else {
             wcscpy_s(mtuStr, L"N/A");
         }
-        ListView_SetItemText(g_hListView, idx, 1, mtuStr);
+        ListView_SetItemText(g_hListView, idx, 2, mtuStr);
 
-        // MAC
-        ListView_SetItemText(g_hListView, idx, 2,
+        // MAC (column 3)
+        ListView_SetItemText(g_hListView, idx, 3,
                              const_cast<LPWSTR>(ad.mac.c_str()));
 
-        // 状态
-        ListView_SetItemText(g_hListView, idx, 3,
+        // 状态 (column 4)
+        ListView_SetItemText(g_hListView, idx, 4,
                              const_cast<LPWSTR>(ad.connected ? L"已连接" : L"未连接"));
     }
     ReleaseSRWLockShared(&g_adaptersLock);
@@ -651,7 +670,7 @@ static DWORD WINAPI MtuThreadProc(LPVOID lpParam) {
     } else {
         // ── 2. 回退到 netsh ──
         WriteLog(L"[信息] API 方式失败，尝试 netsh 回退方案...");
-        success = SetMTUviaNetsh(params->adapterName, params->newMTU);
+        success = SetMTUviaNetsh(params->ifIndex, params->newMTU);
 
         if (success) {
             _snwprintf_s(resultMsg, _countof(resultMsg), _TRUNCATE,
@@ -950,7 +969,7 @@ static DWORD WINAPI RestoreThreadProc(LPVOID) {
     // 执行恢复
     bool success = SetMTUviaAPI(ifIndex, backupMTU);
     if (!success) {
-        success = SetMTUviaNetsh(adapterName, backupMTU);
+        success = SetMTUviaNetsh(ifIndex, backupMTU);
     }
 
     wchar_t* msg = new wchar_t[256];
@@ -1143,6 +1162,9 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lPara
                     break;
                 case IDC_REFRESH_BTN:
                     RefreshAdapterList();
+                    break;
+                case IDC_CLEAR_LOG:
+                    SetWindowTextW(g_hLogEdit, L"");
                     break;
                 case IDC_PING_BTN:
                     RunPingTest();

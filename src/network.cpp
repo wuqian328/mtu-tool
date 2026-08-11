@@ -162,12 +162,12 @@ static std::wstring ReadProcessOutput(HANDLE hReadPipe) {
     return output;
 }
 
-bool SetMTUviaNetsh(const std::wstring& adapterName, uint32_t newMTU) {
-    // 构建命令行: netsh interface ipv4 set subinterface "<name>" mtu=<值> store=persistent
+bool SetMTUviaNetsh(NET_IFINDEX ifIndex, uint32_t newMTU) {
+    // 构建命令行: netsh interface ipv4 set subinterface <ifIndex> mtu=<值> store=persistent
     wchar_t cmdLine[512] = {};
     _snwprintf_s(cmdLine, _countof(cmdLine), _TRUNCATE,
-                 L"netsh interface ipv4 set subinterface \"%s\" mtu=%lu store=persistent",
-                 adapterName.c_str(), newMTU);
+                 L"netsh interface ipv4 set subinterface %lu mtu=%lu store=persistent",
+                 ifIndex, newMTU);
 
     WriteLog(L"[执行] %s", cmdLine);
 
